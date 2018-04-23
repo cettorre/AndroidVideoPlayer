@@ -1,14 +1,12 @@
 package com.example.cettorre.androidvideoplayer;
 
-import android.content.Intent;
+
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Surface;
-import android.view.View;
-
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -45,6 +43,48 @@ public class MainActivity extends AppCompatActivity implements VideoRendererEven
 
     private SimpleExoPlayerView simpleExoPlayerView;
     private SimpleExoPlayer player;
+    int playerStateCount=-2;
+
+    int paused =0;
+    int restarted =0;
+
+    public int getPausedTimes(int count){
+
+        int result=0;
+
+        if(count==0){
+            result=0;
+        }else if(count==1){
+            result=0;
+        }else if (count>1&&player.isPlayingAd())
+            result=playerStateCount/2-1;
+        else if (count>1&&!player.isPlayingAd())
+            result=playerStateCount/2;
+
+        return result;
+    }
+
+
+
+    public int getRestartedTimes(int count){
+        int result=0;
+
+        if(count==0){
+            result=0;
+        }
+        else if (count==1){
+            result=1;
+        }
+        else if (count>1&&player.isPlayingAd())
+            result=playerStateCount/2;
+        else if (count>1&&!player.isPlayingAd())
+            result=playerStateCount/2-1;
+
+        return result;
+
+
+    }
+
 
 
     @Override
@@ -110,23 +150,53 @@ public class MainActivity extends AppCompatActivity implements VideoRendererEven
 
             @Override
             public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-                //when finished
 
                 Log.i("videop", "Listener-onTracksChanged...");
 
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    Log.i("videop", "Listener-..." + player.getDuration() + LocalDateTime.now());
-                }
+         //       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+         //           Log.i("videop", "Listener-..." + player.getDuration() + LocalDateTime.now());
+         //       }
 
 
             }
 
             List<Long> timeList = new ArrayList<>();
+            List<Long> elapsedList = new ArrayList<>();
 
             @Override
             public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-                Log.i("videop", "Listener-onPlayerStateChanged...");
+
+                Log.i("video_p", "Listener-onPlayerStateChanged...");
+                playerStateCount++;
+
+                Log.i("video_p", "Listener-onPlayerStateChanged...");
+                Log.i("video_p", "content position: " + (player.getContentPosition() / 1000) + "s.");
+                Log.i("video_p", "current position:  "+ player.getCurrentPosition() / 1000+ "s.");
+
+                Log.i("video_p", "Left: " + ((player.getDuration() - player.getContentPosition()) / 1000) + "s.");
+                Log.e("video_p", "Duration: " + (player.getDuration() / 1000) + "s.");
+                Log.e("video_p", "count: "+playerStateCount );
+
+
+                timeList.add(player.getCurrentPosition());
+
+                long elapsed=0;
+                if(timeList.size()>2)
+                    elapsed=(timeList.get((timeList.size()-1))-(timeList.get(timeList.size()-2)));
+
+                Log.e("video_p", "elapsed: " + elapsed/1000 +"s");
+                elapsedList.add(elapsed);
+
+
+                paused = getPausedTimes(playerStateCount);
+                restarted = getRestartedTimes(playerStateCount);
+
+
+                Log.e("video_p", "paused: "+ paused);
+                Log.e("video_p", "restarted: "+ restarted);
+                Log.e("video_p", "elapsedList: "+ elapsedList);
+                Log.e("video_p", "timeList: "+ timeList);
 
             }
 
@@ -150,6 +220,21 @@ public class MainActivity extends AppCompatActivity implements VideoRendererEven
 
             }
         });
+
+        player.setVideoDebugListener(this); //for listening to resolution change and  outputing the resolution
+    }
+
+
+
+
+
+    @Override
+    public void onRenderedFirstFrame(Surface surface) {
+        Log.i("video_f", "Listener-onRenderedFirstFrame..." + surface);
+
+
+        //Video shows up its first frame -> frame message
+
     }
 
 
@@ -178,14 +263,6 @@ public class MainActivity extends AppCompatActivity implements VideoRendererEven
 
     }
 
-    @Override
-    public void onRenderedFirstFrame(Surface surface) {
-        Log.i("videop", "Listener-onRenderedFirstFrame..." + surface);
-
-
-        //Video shows up its first frame -> frame message
-
-    }
 
     @Override
     public void onVideoDisabled(DecoderCounters counters) {
