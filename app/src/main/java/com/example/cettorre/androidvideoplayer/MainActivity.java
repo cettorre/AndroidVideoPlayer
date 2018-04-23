@@ -2,6 +2,7 @@ package com.example.cettorre.androidvideoplayer;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -50,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements VideoRendererEven
 
     int paused =0;
     int restarted =0;
+    long elapsed=0;
 
     public int getPausedTimes(int count){
 
@@ -128,9 +130,10 @@ public class MainActivity extends AppCompatActivity implements VideoRendererEven
         MediaSource videoSource = new HlsMediaSource(m3u8VideoUri, dataSourceFactory, 1, null, null);
 
         final LoopingMediaSource loopingSource = new LoopingMediaSource(videoSource);
+        //        player.setRepeatMode(Player.REPEAT_MODE_ALL);
 
         // Prepare the player with the source.
-        player.prepare(loopingSource);
+        player.prepare(videoSource);
 
 
         player.addListener(new Player.EventListener() {
@@ -184,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements VideoRendererEven
 
                 timeList.add(player.getCurrentPosition());
 
-                long elapsed=0;
+
                 if(timeList.size()>2)
                     elapsed=(timeList.get((timeList.size()-1))-(timeList.get(timeList.size()-2)));
 
@@ -200,6 +203,33 @@ public class MainActivity extends AppCompatActivity implements VideoRendererEven
                 Log.e("video_p", "restarted: "+ restarted);
                 Log.e("video_p", "elapsedList: "+ elapsedList);
                 Log.e("video_p", "timeList: "+ timeList);
+
+                if (playbackState == Player.STATE_ENDED ){
+                    Log.e("v_end", "ended ");
+
+                    Intent i = new Intent("com.example.cettorre.androidvideoplayerplugin.VIDEOPLUGIN");
+                    i.putExtra("dataIntentElapsed", String.valueOf(elapsed));
+                    i.putExtra("dataIntentRestarted", String.valueOf(restarted));
+                    i.putExtra("dataIntentPaused", String.valueOf(paused));
+                    startActivity(i);
+                }
+
+
+                switch(playbackState) {
+                    case Player.STATE_BUFFERING:
+                        break;
+                    case Player.STATE_ENDED:
+                        Log.e("end", "ended: ");
+                        break;
+                    case Player.STATE_IDLE:
+                        break;
+                    case Player.STATE_READY:
+                        break;
+                    default:
+                        break;
+                }
+
+
 
             }
 
@@ -237,7 +267,11 @@ public class MainActivity extends AppCompatActivity implements VideoRendererEven
 
         SharedPreferences sharedPref = con.getSharedPreferences(".preferences", Context.MODE_WORLD_READABLE);
         SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString("shared_token", "!!!!!!!!!AAAAAAAAAAAA!!!!!!!!!");
+        editor.putString("shared_token", "!!AAAAAAAAAAAA");
+        editor.putLong("paused",paused);
+        editor.putString("restarted", "!!AAAAAAAAAAAA/7/7");
+        editor.putString("elapsed", "!!AAAAAAAAAAAA/7/7");
+
         editor.commit();
 
 
