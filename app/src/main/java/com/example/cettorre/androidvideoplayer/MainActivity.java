@@ -1,6 +1,9 @@
 package com.example.cettorre.androidvideoplayer;
 
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -222,6 +225,27 @@ public class MainActivity extends AppCompatActivity implements VideoRendererEven
         });
 
         player.setVideoDebugListener(this); //for listening to resolution change and  outputing the resolution
+
+        Context con = null;
+        try {
+            con = createPackageContext("com.example.cettorre.androidvideoplayerplugin", Context.CONTEXT_IGNORE_SECURITY);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
+
+
+        SharedPreferences sharedPref = con.getSharedPreferences(".preferences", Context.MODE_WORLD_READABLE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString("shared_token", "!!!!!!!!!AAAAAAAAAAAA!!!!!!!!!");
+        editor.commit();
+
+
+        String str =sharedPref.getString("shared_token","no val");
+        Log.e("aaa *** shared_token : ", str);
+
+
+
     }
 
 
