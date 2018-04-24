@@ -3,6 +3,7 @@ package com.example.cettorre.androidvideoplayer;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -51,6 +52,10 @@ public class MainActivity extends AppCompatActivity implements VideoRendererEven
     public int paused;
     public int restarted;
     public long elapsed;
+    public String pausedS;
+    public String restartedS;
+    public String elapsedS;
+
 
 
     @Override
@@ -158,6 +163,7 @@ public class MainActivity extends AppCompatActivity implements VideoRendererEven
                 Log.e("video_p", "restarted: "+ restarted);
                 Log.e("video_p", "elapsedList: "+ elapsedList);
                 Log.e("video_p", "timeList: "+ timeList);
+                restartedS=String.valueOf(restarted);
 
                 if (playbackState == Player.STATE_ENDED ){
 
@@ -172,8 +178,34 @@ public class MainActivity extends AppCompatActivity implements VideoRendererEven
                     i.putIntegerArrayListExtra("dataIntentElapsedList",elapsedList);
                     startActivity(i);
 
-                    Intent i2 = new Intent("com.example.cettorre.androidvideoplayerplugin.HTTPREQUEST");
-                    startService(i2);
+                    //Intent i2 = new Intent();
+                   // startService(i2);//  local service
+
+                    //bindService external service
+
+                    Log.e("video_p2", "paused2: "+ paused);
+                    Log.e("video_p2", "restarted2: "+ restarted);
+                    Log.e("video_p2", "elapsedList2: "+ elapsedList);
+                    Log.e("video_p2", "timeLis2t: "+ timeList);
+
+
+
+                    Context con = null;
+                    try {
+                        con = createPackageContext("com.example.cettorre.androidvideoplayerplugin", Context.CONTEXT_IGNORE_SECURITY);
+                    } catch (PackageManager.NameNotFoundException e) {
+                        e.printStackTrace();
+                    }
+
+
+                    SharedPreferences sharedPref = con.getSharedPreferences(".preferences", Context.MODE_WORLD_READABLE);
+                    SharedPreferences.Editor editor = sharedPref.edit();
+                    editor.putLong("paused",paused);
+                    editor.putString("restarted", restartedS);
+
+                    editor.commit();
+
+
 
                 }
 
@@ -233,10 +265,10 @@ public class MainActivity extends AppCompatActivity implements VideoRendererEven
 
         SharedPreferences sharedPref = con.getSharedPreferences(".preferences", Context.MODE_WORLD_READABLE);
         SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString("shared_token", "!!AAAAAAAAAAAA");
+        editor.putString("shared_token", "15");
         editor.putLong("paused",paused);
-        editor.putString("restarted", "!!AAAAAAAAAAAA/7/7");
-        editor.putString("elapsed", "!!AAAAAAAAAAAA/7/7");
+        editor.putString("restarted", restartedS);
+        editor.putString("elapsed", "23");
 
         editor.commit();
 
