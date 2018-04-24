@@ -52,9 +52,7 @@ public class MainActivity extends AppCompatActivity implements VideoRendererEven
     public int paused;
     public int restarted;
     public long elapsed;
-    public String pausedS;
     public String restartedS;
-    public String elapsedS;
 
 
 
@@ -95,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements VideoRendererEven
         //MediaSource
         MediaSource videoSource = new HlsMediaSource(m3u8VideoUri, dataSourceFactory, 1, null, null);
 
-        final LoopingMediaSource loopingSource = new LoopingMediaSource(videoSource);
+        //final LoopingMediaSource loopingSource = new LoopingMediaSource(videoSource);
         //        player.setRepeatMode(Player.REPEAT_MODE_ALL);
 
         // Prepare the player with the source.
@@ -254,40 +252,13 @@ public class MainActivity extends AppCompatActivity implements VideoRendererEven
 
         player.setVideoDebugListener(this); //for listening to resolution change and  outputing the resolution
 
-        Context con = null;
-        try {
-            con = createPackageContext("com.example.cettorre.androidvideoplayerplugin", Context.CONTEXT_IGNORE_SECURITY);
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-
-
-
-        SharedPreferences sharedPref = con.getSharedPreferences(".preferences", Context.MODE_WORLD_READABLE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString("shared_token", "15");
-        editor.putLong("paused",paused);
-        editor.putString("restarted", restartedS);
-        editor.putString("elapsed", "23");
-
-        editor.commit();
-
-
-        String str =sharedPref.getString("shared_token","no val");
-        Log.e("aaa *** shared_token : ", str);
-
 
 
     }
 
-
-
-
-
     @Override
     public void onRenderedFirstFrame(Surface surface) {
         Log.i("video_f", "Listener-onRenderedFirstFrame..." + surface);
-
 
         //Video shows up its first frame -> frame message
 
