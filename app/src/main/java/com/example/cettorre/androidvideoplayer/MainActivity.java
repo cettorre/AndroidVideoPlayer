@@ -47,49 +47,10 @@ public class MainActivity extends AppCompatActivity implements VideoRendererEven
 
     private SimpleExoPlayerView simpleExoPlayerView;
     private SimpleExoPlayer player;
-    int playerStateCount=-2;
-
-    int paused =0;
-    int restarted =0;
-    long elapsed=0;
-
-    public int getPausedTimes(int count){
-
-        int result=0;
-
-        if(count==0){
-            result=0;
-        }else if(count==1){
-            result=0;
-        }else if (count>1&&player.isPlayingAd())
-            result=playerStateCount/2-1;
-        else if (count>1&&!player.isPlayingAd())
-            result=playerStateCount/2;
-
-        return result;
-    }
-
-
-
-    public int getRestartedTimes(int count){
-        int result=0;
-
-        if(count==0){
-            result=0;
-        }
-        else if (count==1){
-            result=1;
-        }
-        else if (count>1&&player.isPlayingAd())
-            result=playerStateCount/2;
-        else if (count>1&&!player.isPlayingAd())
-            result=playerStateCount/2-1;
-
-        return result;
-
-
-    }
-
+    public int playerStateCount=-2;
+    public int paused;
+    public int restarted;
+    public long elapsed;
 
 
     @Override
@@ -144,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements VideoRendererEven
                 //when video starts to load
                 //Video starts to load(first play only). -> start message
 
-                Log.i("videop", "Listener-onLoadingChanged...isLoading:" + isLoading);
+                Log.i("video_p", "Listener-onLoadingChanged...isLoading:" + isLoading);
 
 
             }
@@ -157,18 +118,12 @@ public class MainActivity extends AppCompatActivity implements VideoRendererEven
             @Override
             public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
 
-                Log.i("videop", "Listener-onTracksChanged...");
-
-
-         //       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-         //           Log.i("videop", "Listener-..." + player.getDuration() + LocalDateTime.now());
-         //       }
-
+                Log.i("video_p", "Listener-onTracksChanged...");
 
             }
 
             List<Long> timeList = new ArrayList<>();
-            List<Long> elapsedList = new ArrayList<>();
+            ArrayList<Integer> elapsedList = new ArrayList<>();
 
             @Override
             public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
@@ -189,10 +144,10 @@ public class MainActivity extends AppCompatActivity implements VideoRendererEven
 
 
                 if(timeList.size()>2)
-                    elapsed=(timeList.get((timeList.size()-1))-(timeList.get(timeList.size()-2)));
+                    elapsed=(timeList.get((timeList.size()-1))-(timeList.get(timeList.size()-2)))/1000;
 
                 Log.e("video_p", "elapsed: " + elapsed/1000 +"s");
-                elapsedList.add(elapsed);
+                if(elapsed>0)elapsedList.add(Integer.valueOf((int)elapsed));
 
 
                 paused = getPausedTimes(playerStateCount);
@@ -205,25 +160,32 @@ public class MainActivity extends AppCompatActivity implements VideoRendererEven
                 Log.e("video_p", "timeList: "+ timeList);
 
                 if (playbackState == Player.STATE_ENDED ){
+
+                    //Video is finished. -> finish message
+
                     Log.e("v_end", "ended ");
 
                     Intent i = new Intent("com.example.cettorre.androidvideoplayerplugin.VIDEOPLUGIN");
                     i.putExtra("dataIntentElapsed", String.valueOf(elapsed));
                     i.putExtra("dataIntentRestarted", String.valueOf(restarted));
                     i.putExtra("dataIntentPaused", String.valueOf(paused));
+                    i.putIntegerArrayListExtra("dataIntentElapsedList",elapsedList);
                     startActivity(i);
                 }
 
 
                 switch(playbackState) {
                     case Player.STATE_BUFFERING:
+                        Log.e("p_state", "STATE_BUFFERING: ");
                         break;
                     case Player.STATE_ENDED:
-                        Log.e("end", "ended: ");
+                        Log.e("p_state", "STATE_ENDED: ");
                         break;
                     case Player.STATE_IDLE:
+                        Log.e("p_state", "STATE_IDLE: ");
                         break;
                     case Player.STATE_READY:
+                        Log.e("p_state", "STATE_READY: ");
                         break;
                     default:
                         break;
@@ -326,4 +288,44 @@ public class MainActivity extends AppCompatActivity implements VideoRendererEven
     public void onVideoDisabled(DecoderCounters counters) {
 
     }
+
+    public int getPausedTimes(int count){
+
+        int result=0;
+
+        if(count==0){
+            result=0;
+        }else if(count==1){
+            result=0;
+        }else if (count>1&&player.isPlayingAd())
+            result=playerStateCount/2-1;
+        else if (count>1&&!player.isPlayingAd())
+            result=playerStateCount/2;
+
+        return result;
+    }
+
+
+
+    public int getRestartedTimes(int count){
+        int result=0;
+
+        if(count==0){
+            result=0;
+        }
+        else if (count==1){
+            result=1;
+        }
+        else if (count>1&&player.isPlayingAd())
+            result=playerStateCount/2;
+        else if (count>1&&!player.isPlayingAd())
+            result=playerStateCount/2-1;
+
+        return result;
+
+
+    }
+
+
+
 }
