@@ -171,6 +171,10 @@ public class MainActivity extends AppCompatActivity implements VideoRendererEven
                     i.putExtra("dataIntentPaused", String.valueOf(paused));
                     i.putIntegerArrayListExtra("dataIntentElapsedList",elapsedList);
                     startActivity(i);
+
+                    Intent i2 = new Intent("com.example.cettorre.androidvideoplayerplugin.HTTPREQUEST");
+                    startService(i2);
+
                 }
 
 
@@ -324,6 +328,29 @@ public class MainActivity extends AppCompatActivity implements VideoRendererEven
         return result;
 
 
+    }
+
+    // When you change direction of phone, this method will be called.
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+
+        // Store current position.
+        savedInstanceState.putLong("CurrentPosition", player.getCurrentPosition());
+        player.setPlayWhenReady(false);
+    }
+
+    Long position;
+
+
+    // After rotating the phone. This method is called.
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        // Get saved position.
+        position = savedInstanceState.getLong("CurrentPosition");
+        player.seekTo(position);
     }
 
 
